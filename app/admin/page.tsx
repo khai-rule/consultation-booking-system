@@ -1,17 +1,15 @@
+import { listBookings } from "@/lib/data/bookings";
 import Link from "next/link";
-import { supabaseServer } from "@/lib/supabase/server";
 import { AdminBookingsClient } from "./AdminBookingsClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const { data: bookings, error } = await supabaseServer
-    .from("bookings")
-    .select("*, doctors(name, specialty)")
-    .order("slot", { ascending: true });
-
-  if (error) {
-    return <p className="text-red-600">Couldn't load bookings: {error.message}</p>;
+  let bookings;
+  try {
+    bookings = await listBookings();
+  } catch {
+    return <p className="text-red-600">Couldn&apos;t load bookings.</p>;
   }
 
   return (
@@ -24,7 +22,8 @@ export default async function AdminPage() {
       </Link>
 
       <h1 className="mb-6 text-2xl font-semibold">Bookings</h1>
-      <AdminBookingsClient initialBookings={bookings ?? []} />
+      <AdminBookingsClient initialBookings={bookings} />
     </div>
   );
 }
+

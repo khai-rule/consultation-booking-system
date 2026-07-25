@@ -1,18 +1,14 @@
 import { StatusBadge } from "@/components/ui/badge";
-import { supabaseServer } from "@/lib/supabase/server";
+import { getBooking } from "@/lib/data/bookings";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConfirmationPage({ params }: { params: { id: string } }) {
-  const { data: booking, error } = await supabaseServer
-    .from("bookings")
-    .select("*, doctors(name, specialty)")
-    .eq("id", params.id)
-    .single();
+  const booking = await getBooking(params.id);
 
-  if (error || !booking) {
+  if (!booking) {
     notFound();
   }
 

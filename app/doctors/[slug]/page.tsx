@@ -1,18 +1,14 @@
+import { getDoctorBySlug } from "@/lib/data/doctors";
 import Link from "next/link";
-import { supabaseServer } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { DoctorBookingClient } from "./DoctorBookingClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function DoctorPage({ params }: { params: { slug: string } }) {
-  const { data: doctor, error } = await supabaseServer
-    .from("doctors")
-    .select("*")
-    .eq("slug", params.slug)
-    .single();
+  const doctor = await getDoctorBySlug(params.slug);
 
-  if (error || !doctor) {
+  if (!doctor) {
     notFound();
   }
 

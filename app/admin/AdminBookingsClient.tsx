@@ -1,17 +1,17 @@
 "use client";
 
 import { StatusBadge } from "@/components/ui/badge";
-import { Booking, BookingStatus, VALID_TRANSITIONS } from "@/lib/types";
+import { BookingStatus, BookingWithDoctor, VALID_TRANSITIONS } from "@/lib/types";
 import { useState } from "react";
-
-type BookingWithDoctor = Booking & { doctors: { name: string; specialty: string } | null };
 
 export function AdminBookingsClient({ initialBookings }: { initialBookings: BookingWithDoctor[] }) {
   const [bookings, setBookings] = useState(initialBookings);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [errorId, setErrorId] = useState<string | null>(null);
 
   async function updateStatus(id: string, status: BookingStatus) {
     setUpdatingId(id);
+    setErrorId(null);
     const res = await fetch(`/api/bookings/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -21,6 +21,8 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
     if (res.ok) {
       const { booking } = await res.json();
       setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status: booking.status } : b)));
+    } else {
+      setErrorId(id);
     }
     setUpdatingId(null);
   }
@@ -44,6 +46,9 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
 
             <div className="flex items-center gap-2">
               <StatusBadge status={booking.status} />
+              {errorId === booking.id && (
+                <span className="text-xs text-red-600">Update failed</span>
+              )}
               {nextOptions.length > 0 && (
                 <select
                   disabled={updatingId === booking.id}

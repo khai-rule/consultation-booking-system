@@ -1,15 +1,13 @@
-import { supabaseServer } from "@/lib/supabase/server";
+import { apiError } from "@/lib/api";
+import { listDoctors } from "@/lib/data/doctors";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const { data, error } = await supabaseServer
-    .from("doctors")
-    .select("*")
-    .order("name");
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const doctors = await listDoctors();
+    return NextResponse.json({ doctors });
+  } catch (e) {
+    return apiError(e instanceof Error ? e.message : "Server error", 500);
   }
-
-  return NextResponse.json({ doctors: data });
 }
+

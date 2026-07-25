@@ -1,16 +1,14 @@
-import { supabaseServer } from "@/lib/supabase/server";
+import { listDoctors } from "@/lib/data/doctors";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function DoctorListPage() {
-  const { data: doctors, error } = await supabaseServer
-    .from("doctors")
-    .select("*")
-    .order("name");
-
-  if (error) {
-    return <p className="text-red-600">Couldn't load doctors: {error.message}</p>;
+  let doctors;
+  try {
+    doctors = await listDoctors();
+  } catch {
+    return <p className="text-red-600">Couldn&apos;t load doctors.</p>;
   }
 
   return (

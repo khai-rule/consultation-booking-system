@@ -4,6 +4,16 @@ export interface Doctor {
   id: string;
   name: string;
   specialty: string;
+  slug: string;
+}
+
+/**
+ * A booking row with its joined doctor fields, as returned by
+ * `.select("*, doctors(name, specialty)")`. Used by the admin view and
+ * confirmation page — declared here so it isn't re-invented per file.
+ */
+export interface BookingWithDoctor extends Booking {
+  doctors: Pick<Doctor, "name" | "specialty"> | null;
 }
 
 export interface Booking {
