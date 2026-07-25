@@ -22,7 +22,7 @@ export default async function DoctorListPage() {
         {(doctors ?? []).map((doctor) => (
           <Link
             key={doctor.id}
-            href={`/doctors/${doctor.id}`}
+            href={`/doctors/${doctor.slug}`}
             className="block rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-slate-300 hover:bg-slate-50"
           >
             <div className="font-medium">{doctor.name}</div>

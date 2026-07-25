@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { AdminBookingsClient } from "./AdminBookingsClient";
 
@@ -15,6 +16,13 @@ export default async function AdminPage() {
 
   return (
     <div>
+      <Link
+        href="/"
+        className="mb-6 inline-block text-sm text-slate-400 hover:text-slate-600"
+      >
+        &larr; Back
+      </Link>
+
       <h1 className="mb-6 text-2xl font-semibold">Bookings</h1>
       <AdminBookingsClient initialBookings={bookings ?? []} />
     </div>

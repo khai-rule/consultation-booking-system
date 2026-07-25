@@ -6,7 +6,12 @@ create extension if not exists "pgcrypto";
 create table if not exists doctors (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  specialty text not null
+  specialty text not null,
+  -- slug is used only for human-readable URLs (/doctors/<slug>).
+  -- The UUID id remains the internal primary key in all API calls and
+  -- foreign-key references. Uniqueness is enforced at the DB level;
+  -- see Known Limitations in the README for the name-collision edge case.
+  slug text unique not null
 );
 
 create table if not exists bookings (
