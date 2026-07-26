@@ -1,6 +1,9 @@
 import { apiError } from "@/lib/api";
 import { createBooking, listBookings } from "@/lib/data/bookings";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -34,6 +37,10 @@ export async function POST(req: NextRequest) {
   if (result.error) {
     return apiError(result.error, 500);
   }
+
+  // Invalidate the admin page router cache so the new booking is visible
+  // immediately on next navigation, without requiring a manual refresh.
+  revalidatePath("/admin");
 
   return NextResponse.json({ booking: result.data }, { status: 201 });
 }

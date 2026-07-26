@@ -2,6 +2,8 @@ import { apiError } from "@/lib/api";
 import { listDoctors } from "@/lib/data/doctors";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const doctors = await listDoctors();

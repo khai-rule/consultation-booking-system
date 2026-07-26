@@ -3,6 +3,8 @@ import { getBooking, getBookingStatus, updateBookingStatus } from "@/lib/data/bo
 import { BookingStatus, isValidTransition } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
