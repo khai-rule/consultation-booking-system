@@ -15,14 +15,14 @@ export default async function ConfirmationPage({ params }: { params: { id: strin
   const slotDate = new Date(booking.slot);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 text-center">
-      <div className="mb-3 text-3xl">✓</div>
-      <h1 className="mb-1 text-xl font-semibold">Booking confirmed</h1>
-      <p className="mb-4 text-sm text-slate-500">
-        {booking.doctors?.name} · {booking.doctors?.specialty}
+    <div className="rounded-lg border border-border bg-surface p-6 text-center">
+      <div className="mb-3 text-3xl">&#10003;</div>
+      <h1 className="mb-1 text-heading">Booking confirmed</h1>
+      <p className="mb-4 text-muted-foreground">
+        {booking.doctors?.name} &middot; {booking.doctors?.specialty}
       </p>
 
-      <div className="mb-4 rounded-md bg-slate-50 p-4 text-sm">
+      <div className="mb-4 rounded-md bg-background p-4">
         <p>
           {slotDate.toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "long" })}
         </p>
@@ -35,9 +35,10 @@ export default async function ConfirmationPage({ params }: { params: { id: strin
         <StatusBadge status={booking.status} />
       </div>
 
-      <Link href="/" className="text-sm text-slate-500 hover:text-slate-700">
-        ← Book another
+      <Link href="/" className="text-muted-foreground hover:text-foreground">
+        &larr; Book another
       </Link>
     </div>
   );
 }
+

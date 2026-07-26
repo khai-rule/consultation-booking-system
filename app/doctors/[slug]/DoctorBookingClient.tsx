@@ -67,7 +67,7 @@ export function DoctorBookingClient({ doctorId }: { doctorId: string }) {
     return (
       <div className="grid grid-cols-3 gap-2">
         {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="h-10 animate-pulse rounded-md bg-slate-200" />
+          <div key={i} className="h-10 animate-pulse rounded-md bg-surface-sunken" />
         ))}
       </div>
     );
@@ -75,7 +75,7 @@ export function DoctorBookingClient({ doctorId }: { doctorId: string }) {
 
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-slate-700">Available slots</p>
+      <p className="mb-2 font-medium text-foreground">Available slots</p>
       <div className="grid grid-cols-3 gap-2">
         {slots.map((slot) => (
           <button
@@ -83,10 +83,15 @@ export function DoctorBookingClient({ doctorId }: { doctorId: string }) {
             disabled={!slot.available}
             onClick={() => setSelected(slot.time)}
             className={cn(
-              "rounded-md border px-3 py-2 text-sm transition-colors",
-              !slot.available && "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300",
-              slot.available && selected !== slot.time && "border-slate-200 bg-white hover:border-slate-400",
-              slot.available && selected === slot.time && "border-slate-900 bg-slate-900 text-white"
+              "rounded-md border px-3 py-2 text-body transition-colors",
+              !slot.available &&
+                "cursor-not-allowed border-border-disabled bg-background text-disabled-foreground",
+              slot.available &&
+                selected !== slot.time &&
+                "border-border bg-surface hover:border-border-hover",
+              slot.available &&
+                selected === slot.time &&
+                "border-primary bg-primary text-primary-fg"
             )}
           >
             {slot.label}
@@ -95,18 +100,18 @@ export function DoctorBookingClient({ doctorId }: { doctorId: string }) {
       </div>
 
       {selected && (
-        <div className="mt-6 space-y-3 rounded-lg border border-slate-200 bg-white p-4">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Your name</span>
+        <div className="mt-6 space-y-3 rounded-lg border border-border bg-surface p-4">
+          <label className="block">
+            <span className="mb-1 block font-medium text-foreground">Your name</span>
             <input
               value={patientName}
               onChange={(e) => setPatientName(e.target.value)}
               placeholder="Enter your full name"
-              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-body outline-none transition-colors focus:border-primary"
             />
           </label>
 
-          {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+          {errorMessage && <p className="text-body text-error">{errorMessage}</p>}
 
           <Button
             onClick={handleBook}
@@ -120,3 +125,4 @@ export function DoctorBookingClient({ doctorId }: { doctorId: string }) {
     </div>
   );
 }
+

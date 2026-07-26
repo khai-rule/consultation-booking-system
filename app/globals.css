@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Design tokens — single source of truth for the brand.
+ *
+ * All color, type, and interactive-state values live here as CSS custom
+ * properties. Tailwind is wired to these via tailwind.config.ts so every
+ * component reaches for a semantic class (bg-surface, text-muted-foreground,
+ * bg-primary) rather than a raw palette value (bg-white, text-slate-500,
+ * bg-slate-900). Changing a brand color means editing ONE value here.
+ *
+ * Naming convention: role-based, not hue-based, so the mapping can change
+ * without renaming anything downstream.
+ */
+:root {
+  /* ---- Surfaces ---- */
+  --background:      220 14% 96%;   /* page background      slate-50  */
+  --surface:         0 0% 100%;     /* card / input bg      white     */
+  --surface-sunken:  220 9% 94%;    /* inset / skeleton bg  slate-100 */
+
+  /* ---- Foreground ---- */
+  --foreground:          222 47% 11%;  /* primary text     slate-900 */
+  --muted-foreground:    215 16% 47%;  /* secondary text   slate-500 */
+  --disabled-foreground: 215 20% 75%;  /* disabled text    slate-300 */
+
+  /* ---- Primary action ---- */
+  /* Change this ONE value to rebrand primary buttons, selected slots,   */
+  /* focus rings, and any other primary-interactive element in one edit.  */
+  --primary:       222 47% 11%;   /* slate-900 */
+  --primary-hover: 215 25% 27%;   /* slate-700 */
+  --primary-fg:    0 0% 100%;     /* text on primary bg — white */
+
+  /* ---- Borders ---- */
+  --border:          214 32% 91%;  /* default border  slate-200 */
+  --border-hover:    215 20% 84%;  /* hovered border  slate-300 */
+  --border-disabled: 220 13% 95%;  /* disabled border slate-100 */
+
+  /* ---- Semantic states ---- */
+  --error: 0 72% 51%;   /* error text / messages  red-600 */
+
+  /* ---- Status badge colors (pulled from STATUS_STYLES in badge.tsx) ---- */
+  --status-pending-bg:       43 96% 90%;   /* amber-100 */
+  --status-pending-fg:       26 90% 37%;   /* amber-800 */
+  --status-confirmed-bg:     141 79% 85%;  /* emerald-100 */
+  --status-confirmed-fg:     161 94% 30%;  /* emerald-800 */
+  --status-completed-bg:     220 9% 86%;   /* slate-200 */
+  --status-completed-fg:     215 16% 47%;  /* slate-700 (≈ muted-foreground) */
+  --status-cancelled-bg:     0 94% 94%;    /* red-100 */
+  --status-cancelled-fg:     0 74% 42%;    /* red-700 */
+
+  /* ---- Typography scale ---- */
+  /* Three semantic sizes cover all actual usage in the app.            */
+  /* heading: page/card titles  (was text-2xl, text-xl — normalized)   */
+  /* body:    primary content   (was text-sm throughout)                */
+  /* label:   metadata, badges  (was text-xs in admin/badge)            */
+  --text-heading: 1.125rem;  /* 18px */
+  --text-body:    0.875rem;  /* 14px */
+  --text-label:   0.75rem;   /* 12px */
+}
+
 body {
-  @apply bg-slate-50 text-slate-900;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: var(--text-body);
+  line-height: 1.5;
 }

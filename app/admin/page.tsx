@@ -9,21 +9,22 @@ export default async function AdminPage() {
   try {
     bookings = await listBookings();
   } catch {
-    return <p className="text-red-600">Couldn&apos;t load bookings.</p>;
+    return <p className="text-error">Couldn&apos;t load bookings.</p>;
   }
 
   return (
     <div>
       <Link
         href="/"
-        className="mb-6 inline-block text-sm text-slate-400 hover:text-slate-600"
+        className="mb-6 inline-block text-muted-foreground hover:text-foreground"
       >
         &larr; Back
       </Link>
 
-      <h1 className="mb-6 text-2xl font-semibold">Bookings</h1>
+      <h1 className="mb-6 text-heading">Bookings</h1>
       <AdminBookingsClient initialBookings={bookings} />
     </div>
   );
 }
+
 

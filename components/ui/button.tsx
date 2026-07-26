@@ -11,10 +11,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-          variant === "primary" && "bg-slate-900 text-white hover:bg-slate-700",
-          variant === "secondary" && "bg-slate-100 text-slate-900 hover:bg-slate-200",
-          variant === "ghost" && "hover:bg-slate-100",
+          "inline-flex items-center justify-center rounded-md px-4 py-2 text-body font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+          variant === "primary" && "bg-primary text-primary-fg hover:bg-primary-hover",
+          variant === "secondary" && "bg-surface-sunken text-foreground hover:bg-border",
+          variant === "ghost" && "hover:bg-surface-sunken",
           className
         )}
         {...props}
@@ -23,3 +23,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 Button.displayName = "Button";
+

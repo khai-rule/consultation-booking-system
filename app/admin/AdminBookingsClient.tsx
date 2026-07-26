@@ -28,7 +28,7 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
   }
 
   if (bookings.length === 0) {
-    return <p className="text-sm text-slate-500">No bookings yet.</p>;
+    return <p className="text-muted-foreground">No bookings yet.</p>;
   }
 
   return (
@@ -36,25 +36,25 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
       {bookings.map((booking) => {
         const nextOptions = VALID_TRANSITIONS[booking.status];
         return (
-          <div key={booking.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4">
+          <div key={booking.id} className="flex items-center justify-between rounded-lg border border-border bg-surface p-4">
             <div>
-              <div className="text-sm font-medium">{booking.patient_name}</div>
-              <div className="text-xs text-slate-500">
-                {booking.doctors?.name} · {new Date(booking.slot).toLocaleString("en-SG")}
+              <div className="font-medium">{booking.patient_name}</div>
+              <div className="text-label text-muted-foreground">
+                {booking.doctors?.name} &middot; {new Date(booking.slot).toLocaleString("en-SG")}
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <StatusBadge status={booking.status} />
               {errorId === booking.id && (
-                <span className="text-xs text-red-600">Update failed</span>
+                <span className="text-label text-error">Update failed</span>
               )}
               {nextOptions.length > 0 && (
                 <select
                   disabled={updatingId === booking.id}
                   value=""
                   onChange={(e) => updateStatus(booking.id, e.target.value as BookingStatus)}
-                  className="rounded-md border border-slate-200 px-2 py-1 text-xs disabled:opacity-50"
+                  className="rounded-md border border-border px-2 py-1 text-body disabled:opacity-50"
                 >
                   <option value="" disabled>
                     {updatingId === booking.id ? "Updating..." : "Change status"}
