@@ -1,76 +1,115 @@
 # Consultation Booking System
 
-A simplified booking flow: patients pick a doctor, book an available slot, and get a
-confirmation. Staff manage bookings from an admin view.
+Patients can view doctor slots and make bookings. Staff can manage booking status from an admin page.
 
-## Stack
+## Tech stack and why
 
-Next.js 14 (App Router) + TypeScript + Supabase (Postgres) + Tailwind.
+- Next.js 14 + TypeScript: fast full-stack delivery in one codebase
+- Supabase Postgres: relational constraints for correctness under concurrency
+- Tailwind: quick, consistent UI styling
 
-One repo for UI, API, and data layer — no separate backend to stand up. Postgres over
-a NoSQL store was deliberate: the double-booking guard needs a database-level unique
-constraint, which doesn't work in a document store.
+Main trade-off: this keeps architecture simple and easy to reason about, but skips advanced production concerns like auth and rate limiting.
 
-## Setup
+## Local setup
 
-1. Create a Supabase project, run `supabase/schema.sql` then `supabase/seed.sql`
-2. Copy `.env.example` → `.env.local`, fill in your Supabase URL + anon key + service role key
-3. `npm install && npm run dev` → http://localhost:3000
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` then `supabase/seed.sql` in Supabase SQL editor.
+3. Copy `.env.example` to `.env.local` and fill values.
+4. Install and run:
 
-**Tests:**
 ```bash
-npm run dev              # in one terminal
+npm install
+npm run dev
 ```
 
-## The three things the brief asks about
+Open `http://localhost:3000`.
 
-**Double-booking.** The database prevents it, not the application. `bookings` has a
-partial unique index on `(doctor_id, slot) WHERE status <> 'cancelled'` — the insert
-itself is the atomic claim on a slot, so two concurrent requests can't both succeed.
-The loser gets a Postgres `23505` error, which the API turns into a `409`. Partial
-(not a plain unique constraint) so a cancelled booking frees the slot back up.
+## Environment variables
 
+Required variables are defined in `.env.example`:
 
-**Booking states.** `pending → confirmed → completed`, or `→ cancelled` from either
-`pending` or `confirmed`. Defined once in `lib/types.ts`, enforced server-side in the
-PATCH route (the actual guard), and mirrored in the admin UI so it only offers valid
-next states.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-**Staying correct as it grows.** Three things do the work here: a data-access layer
-(`lib/data/`) so no query is written inline in a route handler; the state machine and
-slot logic living in `lib/` instead of scattered across routes; and one consistent
-error shape across every API response. None of this is exotic — it's just the
-difference between a second developer finding things and re-deriving them.
+## Implemented features
 
-## What's out of scope, on purpose
+### 1) Slot booking with double-booking protection
 
-Auth, payments, notifications, calendar sync, doctor-availability management, rate
-limiting. None of these change the concurrency or state-machine story the brief is
-actually testing, and the brief itself rewards a smaller well-reasoned scope over a
-larger rushed one.
+Assumption: bookings are the source of truth for slot occupancy.
 
-## API
+What is implemented:
 
-| Method | Route | Purpose |
-|---|---|---|
-| GET | `/api/doctors` | List doctors |
-| GET | `/api/doctors/:id/slots` | Available slots, taken ones marked unavailable |
-| POST | `/api/bookings` | Create a booking; `409` on conflict |
-| GET | `/api/bookings` | List bookings (admin) |
-| PATCH | `/api/bookings/:id` | Change status; rejects invalid transitions |
+- Partial unique index on `(doctor_id, slot)` where status is not `cancelled`
+- API maps Postgres unique-violation to `409 Conflict`
 
-## Known limitations
+Known limitation:
 
-- Admin page has no access control
-- `patientName` is free text — no identity verification
-- Slug collisions between same-named doctors aren't auto-resolved (DB rejects the
-  duplicate; would need manual disambiguation)
-- Slot-generation is computed per request, not cached — fine at this scale, first
-  thing to revisit if traffic grew
+- Slot generation is simplified (generated time windows, not doctor-defined calendar availability).
 
-## AI use
+### 2) Booking states and transitions
 
-Built with Claude via Antigravity — scaffolding, boilerplate, and styling iteration.
-I drove the architectural calls myself: the partial-index approach to concurrency,
-the state machine, and the data-access layer, including working through the
-trade-off between a unique index and `SELECT ... FOR UPDATE`.
+Assumption: valid statuses are `pending`, `confirmed`, `completed`, `cancelled`.
+
+What is implemented:
+
+- Server-side transition guard:
+  - `pending -> confirmed|cancelled`
+  - `confirmed -> completed|cancelled`
+  - `completed` and `cancelled` are terminal
+
+Known limitation:
+
+- No audit trail of who changed status and when.
+
+### 3) Structure for scalability/correctness
+
+Assumption: assessment scope prioritizes correctness and maintainability over feature breadth.
+
+What is implemented:
+
+- Separate data-access layer in `lib/data`
+- Shared domain types/state machine in `lib/types.ts`
+- Dedicated API routes for reads/writes
+
+Known limitation:
+
+- No auth, multi-tenant separation, or background job system.
+
+## API overview
+
+| Method | Route                    | Purpose                                          |
+| ------ | ------------------------ | ------------------------------------------------ |
+| GET    | `/api/doctors`           | List doctors                                     |
+| GET    | `/api/doctors/:id/slots` | List slot availability                           |
+| POST   | `/api/bookings`          | Create booking (`409` on conflict)               |
+| GET    | `/api/bookings`          | List bookings (admin)                            |
+| PATCH  | `/api/bookings/:id`      | Update booking status with transition validation |
+
+## Tests
+
+This repo includes a concurrency test for booking correctness.
+
+Prerequisites:
+
+1. App running (`npm run dev`)
+2. `TEST_DOCTOR_ID` set to an existing doctor UUID
+3. Optional: `TEST_BASE_URL` (defaults to `http://localhost:3000`)
+
+Run:
+
+```bash
+TEST_DOCTOR_ID=<doctor-uuid> npm test
+```
+
+## Out of scope
+
+- Authentication/authorization
+- Payments/notifications/calendar sync
+- Rate limiting and observability pipeline
+
+## Submission checklist
+
+- Public Git repository link
+- This README with setup, API overview, assumptions, and limitations
+- Private sharing of working `.env.local` values in submission email

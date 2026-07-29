@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run tests/"
+    "test": "node tests/booking-concurrency.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

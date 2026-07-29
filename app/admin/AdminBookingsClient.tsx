@@ -2,16 +2,41 @@
 
 import { StatusBadge } from "@/components/ui/badge";
 import { BookingStatus, BookingWithDoctor, VALID_TRANSITIONS } from "@/lib/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function AdminBookingsClient({ initialBookings }: { initialBookings: BookingWithDoctor[] }) {
   const [bookings, setBookings] = useState(initialBookings);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [errorId, setErrorId] = useState<string | null>(null);
+  const [error, setError] = useState<{ id: string; message: string } | null>(null);
+  const [isSyncingLatest, setIsSyncingLatest] = useState(true);
+
+  useEffect(() => {
+    setBookings(initialBookings);
+  }, [initialBookings]);
+
+  async function refreshBookings() {
+    try {
+      const res = await fetch("/api/bookings", { cache: "no-store" });
+      if (!res.ok) return;
+      const { bookings: latest } = await res.json();
+      setBookings(latest ?? []);
+    } finally {
+      setIsSyncingLatest(false);
+    }
+  }
+
+  useEffect(() => {
+    // Refresh once on mount to avoid showing stale router-cache snapshots.
+    refreshBookings();
+  }, []);
+
+  if (isSyncingLatest) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
 
   async function updateStatus(id: string, status: BookingStatus) {
     setUpdatingId(id);
-    setErrorId(null);
+    setError(null);
     const res = await fetch(`/api/bookings/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -22,7 +47,10 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
       const { booking } = await res.json();
       setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status: booking.status } : b)));
     } else {
-      setErrorId(id);
+      const json = await res.json().catch(() => ({}));
+      setError({ id, message: json.error ?? "Update failed" });
+      // If another action updated this booking already, resync list state.
+      await refreshBookings();
     }
     setUpdatingId(null);
   }
@@ -46,8 +74,8 @@ export function AdminBookingsClient({ initialBookings }: { initialBookings: Book
 
             <div className="flex items-center gap-2">
               <StatusBadge status={booking.status} />
-              {errorId === booking.id && (
-                <span className="text-label text-error">Update failed</span>
+              {error?.id === booking.id && (
+                <span className="text-label text-error">{error.message}</span>
               )}
               {nextOptions.length > 0 && (
                 <select

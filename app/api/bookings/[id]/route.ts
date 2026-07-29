@@ -1,13 +1,18 @@
 import { apiError } from "@/lib/api";
-import { getBooking, getBookingStatus, updateBookingStatus } from "@/lib/data/bookings";
+import {
+  getBooking,
+  getBookingStatus,
+  updateBookingStatus,
+} from "@/lib/data/bookings";
 import { BookingStatus, isValidTransition } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const booking = await getBooking(params.id);
   if (!booking) return apiError("Booking not found", 404);
@@ -16,20 +21,27 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
-  const { status: nextStatus } = (await req.json()) as { status: BookingStatus };
+  const { status: nextStatus } = (await req.json()) as {
+    status: BookingStatus;
+  };
 
   const current = await getBookingStatus(params.id);
   if (!current) return apiError("Booking not found", 404);
 
   if (!isValidTransition(current.status, nextStatus)) {
-    return apiError(`Cannot move a ${current.status} booking to ${nextStatus}`, 422);
+    return apiError(
+      `Cannot move a ${current.status} booking to ${nextStatus}`,
+      422,
+    );
   }
 
   const updated = await updateBookingStatus(params.id, nextStatus);
   if (!updated) return apiError("Failed to update booking", 500);
 
+  // Ensure admin navigations and back/forward restore see the latest status.
+  revalidatePath("/admin");
+
   return NextResponse.json({ booking: updated });
 }
-
